@@ -1,0 +1,26 @@
+﻿@using System.Globalization
+<style>
+    .date {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
+
+        .date .dayofweek {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .date .fulldate {
+            font-size: 1.5rem;
+        }
+</style>
+
+<div class="date">
+    <div class="dayofweek">@DateTime.Today.DayOfWeek.ToString()</div>
+    <div class="fulldate">, @DateTime.Now.ToString("d MMMM yyyy", ci)</div>
+</div>
+
+@code {
+    CultureInfo ci = new("en-ca");
+}

@@ -1,4 +1,5 @@
 using Conesoft.Website.Inklay.Components;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +16,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-app.UseAntiforgery();
+app
+    .UseStaticFiles(new StaticFileOptions
+    {
+        RequestPath = "/content/feeds/thumbnail",
+        FileProvider = new PhysicalFileProvider((Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / "Entries").Path)
+    })
+    .UseHttpsRedirection()
+    .UseStaticFiles()
+    .UseAntiforgery();
 
 app.MapRazorComponents<App>();
 

@@ -1,0 +1,64 @@
+﻿@using Conesoft.Files
+@using Conesoft.Tools
+@using System.Diagnostics
+@using System.Text.RegularExpressions
+@using System.Net
+@using Conesoft_Website_Kontrol.Tools
+@using Humanizer
+
+<style>
+    .content h2 {
+        line-height: 1rem;
+        font-size: 1rem;
+        -max-height: 1rem;
+        overflow: hidden;
+    }
+    .content p {
+        max-height: 3rem;
+        line-height: 1rem;
+        overflow: hidden;
+        opacity: 0.7;
+    }
+    .content li {
+        margin-bottom: 1rem;
+        list-style-type: none;
+    }
+</style>
+
+<ul class="content">
+    @foreach (var entry in Entries.Take(20))
+    {
+        <li>
+            <h2>@WebUtility.HtmlDecode(entry.Name)</h2>
+            <p>@FastEntryDecoder.DecodeDescription(entry)</p>
+        </li>
+    }
+</ul>
+
+@code {
+    static Conesoft.Files.Directory Storage = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / "Entries";
+    static Conesoft.Files.File NewestEntries = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / Filename.From("Newest Entries", "txt");
+
+    public Entry[] Entries { get; set; } = [];
+
+    public record Entry(string Name, string Url, DateTime Published, string Description, string Category, string Filename)
+    {
+        private string[] types = ["jpg", "png", "svg", "gif"];
+        public string? ImageFilename { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var within24Hours = DateTime.Today.AddDays(-1);
+
+        var loadedEntries = Storage.Info.GetFiles().Where(f => f.CreationTime > within24Hours).OrderByDescending(f => f.CreationTime).ToArray();
+
+        var entries = await loadedEntries.Where(f => f.Extension == ".json").Select(e => File.From(e.FullName)).ReadFromJson<Entry>();
+        Entries = entries.NotNull().Select(e =>
+        {
+            var c = e.Content;
+            c.ImageFilename = loadedEntries.FirstOrDefault(f => f.Extension != ".json" && f.Name.StartsWith(e.NameWithoutExtension))?.Name;
+            return c;
+        }).ToArray();
+    }
+}

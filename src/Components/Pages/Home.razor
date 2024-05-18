@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Conesoft.Website.Inklay.Components.Controls
 
 <PageTitle>Inklay</PageTitle>
 
@@ -6,29 +7,132 @@
     * {
         margin: 0;
         padding: 0;
+        font-size: 20px;
+        line-height: 1em;
         font-family: sans-serif;
+        box-sizing: border-box;
     }
+
     html, body {
         width: 100%;
         height: 100%;
     }
 
+    img {
+        max-width: 100%;
+    }
+
     body {
-        margin: 1rem;
         overflow: hidden;
     }
 
-    footer {
+    section, main, header, footer {
         position: absolute;
-        bottom: 1rem;
+        inset: 0;
+    }
+
+    main {
+        width: 500px;
+        left: 350px;
+        right: 350px;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    section#left {
+        width: 350px;
+        padding-left: 1rem;
+        right: auto;
+    }
+
+    section#right {
+        width: 350px;
+        padding-right: 1rem;
+        left: auto;
+    }
+
+
+    section, main {
+        padding-top: 1rem;
+    }
+
+        main > * {
+            margin-bottom: 1rem;
+        }
+
+    footer {
+        text-align: center;
+        top: auto;
+        left: 350px;
+        right: 350px;
+        margin-bottom: 0.25rem;
+        background: white;
+    }
+
+    li {
+        list-style-type: none;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        line-height: 1rem;
+    }
+
+    .check {
+        font-size: 1.2rem;
+        font-weight: bold;
+        display: inline;
+        line-height: 1rem;
     }
 
 </style>
 
-<h1>Welcome Home!</h1>
+<section id="left">
+    <h1>TODO</h1>
+    <h2 style="margin-top: 1rem; margin-bottom: 1rem">Grocery Items</h2>
+    <ul>
+        <li><div class="check">☐</div> Toilet Paper</li>
+        <li><div class="check">☐</div> Juicy Marbles</li>
+        <li><div class="check">☐</div> Salad</li>
+    </ul>
+    <h2 style="margin-top: 1rem; margin-bottom: 1rem">Vacation</h2>
+    <ul>
+        <li><div class="check">☐</div> Book Car</li>
+        <li><div class="check">☑</div> Book Flight</li>
+    </ul>
+    <br />
+    <br />
+    <br />
+    <br />
+    <h1 style="margin-top: 1rem; margin-bottom: 1rem">Upcoming Events</h1>
+    <ul>
+        <li style="display: grid">
+            Josh Streaming
+            <i>unknown time</i>
+        </li>
+        <li style="display: grid">
+            Cypertruck in Zurich
+            <i>in one week</i>
+        </li>
+        <li style="display: grid">
+            University Masters
+            <i>in two weeks</i>
+        </li>
+        <li style="display: grid">
+            Vacation
+            <i>in 3 weeks</i>
+        </li>
+    </ul>
+</section>
 
-Welcome to your new app.
+<main>
+    <Weather />
+    <Date />
+    <img src="/turtles.jpg" />
+</main>
+
+<section id="right">
+    <Content />
+</section>
 
 <footer>
-    &copy; davepermen @DateTime.Today.Year [last updated @DateTime.Now.ToShortTimeString()]
+    &copy; davepermen @DateTime.Today.Year <i>last updated @DateTime.Now.ToShortTimeString()</i>
 </footer>

@@ -1,0 +1,187 @@
+﻿@using OpenMeteo
+@using System.Text.RegularExpressions
+
+<style>
+    .weather {
+    }
+
+        .weather > * {
+            margin-bottom: 1rem;
+        }
+
+        .weather .current {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+            .weather .current .temperature {
+                font-weight: 900;
+                font-size: 2rem;
+                line-height: 2rem;
+            }
+
+            .weather .current .weathercode {
+                font-size: 1.7rem;
+                font-weight: 100;
+                white-space: nowrap;
+            }
+
+            .weather .current .icon {
+                font-size: 5rem;
+                width: 5rem;
+                line-height: 5rem;
+            }
+
+        .weather .daily {
+            display: flex;
+            gap: 0.5rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        }
+
+            .weather .daily li {
+                text-align: center;
+                flex: 1;
+                list-style-type: none;
+                margin: -0.5rem -0.25rem;
+                padding: 0.5rem 0.25rem;
+            }
+
+                .weather .daily li:nth-child(2n+1) {
+                    background: #bbb;
+                }
+
+            .weather .daily i {
+                font-weight: 100;
+                font-size: 0.8rem;
+            }
+
+            .weather .daily .icon {
+                font-size: 2rem;
+                line-height: 2rem;
+            }
+
+        .weather .icon {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            font-family: 'pe-icon-set-weather';
+        }
+</style>
+
+<div class="weather">
+    <div class="current">
+        <div class="icon">@((MarkupString)WeatherCodeIcons[Current.Weathercode ?? 0])</div>
+        <div>
+            <div class="temperature">
+                @CurrentTemperature
+            </div>
+            <div class="weathercode">
+                @WeatherCodes[Current.Weathercode ?? 0]
+            </div>
+        </div>
+    </div>
+    <ul class="daily">
+        @foreach (var i in Enumerable.Range(0, Daily?.Time?.Length ?? 0))
+        {
+            <li>
+                @DateTime.Parse(Daily!.Time![i]).DayOfWeek.ToString()[..3].ToLowerInvariant()
+                <div class="icon">@((MarkupString)WeatherCodeIcons[(int)(Daily.Weathercode?[i] ?? 0)])</div>
+                <b>@Daily.Temperature_2m_max?[i]</b><i>@DailyUnits.Temperature_2m_max</i>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    string Location = "Menziken";
+
+    string CurrentTemperature { get; set; } = "";
+    string CurrentWind { get; set; } = "";
+
+    Current Current { get; set; } = new Current();
+    CurrentUnits CurrentUnits { get; set; } = new CurrentUnits();
+
+    Daily Daily { get; set; } = new Daily();
+    DailyUnits DailyUnits { get; set; } = new DailyUnits();
+
+    Dictionary<int, string> WeatherCodes = new()
+        {
+            [0] = "Clear",
+            [1] = "Mostly Clear",
+            [2] = "Partly Cloudy",
+            [3] = "Overcast",
+            [45] = "Fog",
+            [48] = "Icy Fog",
+            [51] = "Light Drizzle",
+            [53] = "Drizzle",
+            [55] = "Heavy Drizzle",
+            [80] = "Light Showers",
+            [81] = "Showers",
+            [82] = "Heavy Showers",
+            [61] = "Light Rain",
+            [63] = "Rain",
+            [65] = "Heavy Rain",
+            [56] = "Light Freezing Drizzle",
+            [57] = "Freezing Drizzle",
+            [66] = "Light Freezing Rain",
+            [67] = "Freezing Rain",
+            [71] = "Light Snow",
+            [73] = "Snow",
+            [75] = "Heavy Snow",
+            [77] = "Snow Grains",
+            [85] = "Light Snow Showers",
+            [86] = "Snow Showers",
+            [95] = "Thunderstorm",
+            [96] = "Light T-storm w/ Hail",
+            [99] = "T-storm w/ Hail"
+        };
+
+    Dictionary<int, string> WeatherCodeIcons = new()
+        {
+            [0] = "&#xe999",
+            [1] = "&#xe972",
+            [2] = "&#xe972",
+            [3] = "&#xe972",
+            [45] = "&#xe929",
+            [48] = "Icy Fog",
+            [51] = "Light Drizzle",
+            [53] = "Drizzle",
+            [55] = "Heavy Drizzle",
+            [80] = "&#xe97c",
+            [81] = "Showers",
+            [82] = "Heavy Showers",
+            [61] = "&#xe97c",
+            [63] = "&#xe978",
+            [65] = "Heavy Rain",
+            [56] = "Light Freezing Drizzle",
+            [57] = "Freezing Drizzle",
+            [66] = "Light Freezing Rain",
+            [67] = "Freezing Rain",
+            [71] = "Light Snow",
+            [73] = "Snow",
+            [75] = "Heavy Snow",
+            [77] = "Snow Grains",
+            [85] = "Light Snow Showers",
+            [86] = "Snow Showers",
+            [95] = "&#xe9bf",
+            [96] = "&#xe939",
+            [99] = "T-storm w/ Hail"
+        };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = new OpenMeteoClient();
+        var weatherData = await client.QueryAsync("Menziken", new WeatherForecastOptions() { Current = CurrentOptions.All, Daily = DailyOptions.All });
+        CurrentTemperature = weatherData.Current.Temperature + weatherData.CurrentUnits.Temperature;
+        CurrentWind = $"{weatherData.Current.Windspeed_10m}{weatherData.CurrentUnits.Windspeed_10m}";// + {weatherData.Current.Winddirection_10m}{weatherData.CurrentUnits.Winddirection_10m}";
+
+        CurrentUnits = weatherData.CurrentUnits!;
+        Current = weatherData.Current!;
+        DailyUnits = weatherData.DailyUnits!;
+        Daily = weatherData.Daily!;
+    }
+}
