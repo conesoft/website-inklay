@@ -51,7 +51,7 @@
             }
 
                 .weather .daily li:nth-child(2n+1) {
-                    background: #bbb;
+                    background: #999;
                 }
 
             .weather .daily i {
@@ -89,7 +89,7 @@
             <li>
                 @DateTime.Parse(Daily!.Time![i]).DayOfWeek.ToString()[..3].ToLowerInvariant()
                 <div class="icon">@((MarkupString)WeatherCodeIcons[(int)(Daily.Weathercode?[i] ?? 0)])</div>
-                <b>@Daily.Temperature_2m_max?[i]</b><i>@DailyUnits.Temperature_2m_max</i>
+                <b>@Math.Round(Daily.Temperature_2m_max?[i] ?? 0, 0)</b><i>@DailyUnits.Temperature_2m_max</i>
             </li>
         }
     </ul>

@@ -16,6 +16,7 @@
     <PackageReference Include="Conesoft.All" Version="1.0.1" />
     <PackageReference Include="Conesoft.Hosting" Version="1.2.1" />
     <PackageReference Include="Conesoft.Tools" Version="0.0.4" />
+    <PackageReference Include="Ical.Net" Version="4.2.0" />
     <PackageReference Include="OpenMeteo.dotnet" Version="2.0.0" />
   </ItemGroup>
 

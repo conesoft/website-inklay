@@ -13,9 +13,13 @@
         box-sizing: border-box;
     }
 
-    html, body {
+    html {
         width: 100%;
         height: 100%;
+        display: grid;
+        justify-items: center;
+        align-items: center;
+        background-color: #111;
     }
 
     img {
@@ -23,12 +27,19 @@
     }
 
     body {
+        width: 1200px;
+        height: 825px;
+        background-color: white;
+        position: relative;
+        filter: drop-shadow(0 2rem 3rem black) drop-shadow(0 0 5rem black) drop-shadow(0 0rem 48rem white);
+        outline: 4rem solid black;
         overflow: hidden;
     }
 
     section, main, header, footer {
         position: absolute;
         inset: 0;
+        overflow: hidden;
     }
 
     main {
@@ -86,41 +97,7 @@
 </style>
 
 <section id="left">
-    <h1>TODO</h1>
-    <h2 style="margin-top: 1rem; margin-bottom: 1rem">Grocery Items</h2>
-    <ul>
-        <li><div class="check">☐</div> Toilet Paper</li>
-        <li><div class="check">☐</div> Juicy Marbles</li>
-        <li><div class="check">☐</div> Salad</li>
-    </ul>
-    <h2 style="margin-top: 1rem; margin-bottom: 1rem">Vacation</h2>
-    <ul>
-        <li><div class="check">☐</div> Book Car</li>
-        <li><div class="check">☑</div> Book Flight</li>
-    </ul>
-    <br />
-    <br />
-    <br />
-    <br />
-    <h1 style="margin-top: 1rem; margin-bottom: 1rem">Upcoming Events</h1>
-    <ul>
-        <li style="display: grid">
-            Josh Streaming
-            <i>unknown time</i>
-        </li>
-        <li style="display: grid">
-            Cypertruck in Zurich
-            <i>in one week</i>
-        </li>
-        <li style="display: grid">
-            University Masters
-            <i>in two weeks</i>
-        </li>
-        <li style="display: grid">
-            Vacation
-            <i>in 3 weeks</i>
-        </li>
-    </ul>
+    <Calendar/>
 </section>
 
 <main>
