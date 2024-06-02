@@ -1,9 +1,13 @@
 using Conesoft.Website.Inklay.Components;
-using Microsoft.Extensions.FileProviders;
+using Conesoft.Website.Inklay.Services;
+using Conesoft.Website.Inklay.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpClient();
+builder.Services.AddSingletonWith<CalendarCache>(TimeSpan.FromMinutes(5));
+builder.Services.AddSingletonWith<WeatherCache>(TimeSpan.FromMinutes(30));
 builder.Services.AddRazorComponents();
 
 var app = builder.Build();
@@ -17,11 +21,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app
-    .UseStaticFiles(new StaticFileOptions
-    {
-        RequestPath = "/content/feeds/thumbnail",
-        FileProvider = new PhysicalFileProvider((Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / "Entries").Path)
-    })
+    .UseDeveloperExceptionPage()
     .UseHttpsRedirection()
     .UseStaticFiles()
     .UseAntiforgery();
@@ -29,3 +29,4 @@ app
 app.MapRazorComponents<App>();
 
 app.Run();
+

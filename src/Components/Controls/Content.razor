@@ -46,7 +46,7 @@
 
 @code {
     static Conesoft.Files.Directory Storage = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / "Entries";
-    static Conesoft.Files.File NewestEntries = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / Filename.From("Newest Entries", "txt");
+    //static Conesoft.Files.File NewestEntries = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / Filename.From("Newest Entries", "txt");
 
     public IEnumerable<Entry> Entries { get; set; } = [];
 
@@ -60,16 +60,10 @@
     {
         var within24Hours = DateTime.Today.AddDays(-1);
 
-        var loadedEntries = Storage.Info.GetFiles().Where(f => f.CreationTime > within24Hours).OrderByDescending(f => f.CreationTime);
+        var loadedEntries = Storage.OfType("json", allDirectories: false).Where(f => f.Info.CreationTime > within24Hours).OrderByDescending(f => f.Info.CreationTime);
 
-        var entries = await loadedEntries.Where(f => f.Extension == ".json").Select(e => File.From(e.FullName)).Take(20).ReadFromJson<Entry>();
-        Entries = entries.NotNull().Select(e =>
-        {
-            var c = e.Content;
-            c.ImageFilename = loadedEntries.FirstOrDefault(f => f.Extension != ".json" && f.Name.StartsWith(e.NameWithoutExtension))?.Name;
-            return c;
-        });
+        Entries = (await loadedEntries.Take(10).ReadFromJson<Entry>()).Select(f => f.Content);
 
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+        var _ = Task.Delay(5000).ContinueWith(t => GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true));
     }
 }

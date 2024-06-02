@@ -1,5 +1,10 @@
-﻿@using OpenMeteo
+﻿@using Conesoft.Website.Inklay.Services
+@using Humanizer
+@using OpenMeteo
 @using System.Text.RegularExpressions
+@using System.Diagnostics
+
+@inject WeatherCache weather
 
 <style>
     .weather {
@@ -171,7 +176,7 @@
     protected override async Task OnInitializedAsync()
     {
         var client = new OpenMeteoClient();
-        var weatherData = await client.QueryAsync("Menziken", new WeatherForecastOptions() { Current = CurrentOptions.All, Daily = DailyOptions.All });
+        var weatherData = await weather.GetContent();
         CurrentTemperature = weatherData.Current.Temperature + weatherData.CurrentUnits.Temperature;
         CurrentWind = $"{weatherData.Current.Windspeed_10m}{weatherData.CurrentUnits.Windspeed_10m}";// + {weatherData.Current.Winddirection_10m}{weatherData.CurrentUnits.Winddirection_10m}";
 
