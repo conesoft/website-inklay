@@ -58,12 +58,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var within24Hours = DateTime.Today.AddDays(-1);
+        var within6Hours = DateTime.Now.AddHours(-6);
 
-        var loadedEntries = Storage.OfType("json", allDirectories: false).Where(f => f.Info.CreationTime > within24Hours).OrderByDescending(f => f.Info.CreationTime);
+        var loadedEntries = Storage.OfType("json", allDirectories: false).Where(f => f.Info.CreationTime > within6Hours).OrderByDescending(f => f.Info.CreationTime);
 
         Entries = (await loadedEntries.Take(10).ReadFromJson<Entry>()).Select(f => f.Content);
-
-        var _ = Task.Delay(5000).ContinueWith(t => GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true));
     }
 }

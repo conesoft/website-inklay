@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 builder.Services.AddSingletonWith<CalendarCache>(TimeSpan.FromMinutes(5));
 builder.Services.AddSingletonWith<WeatherCache>(TimeSpan.FromMinutes(30));
+builder.Services.AddSingletonWith<GarbageCollect>(TimeSpan.FromMinutes(15));
 builder.Services.AddRazorComponents();
 
 var app = builder.Build();

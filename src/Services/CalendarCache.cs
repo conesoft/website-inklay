@@ -3,13 +3,15 @@ using Ical.Net.DataTypes;
 
 namespace Conesoft.Website.Inklay.Services
 {
-    public class CalendarCache(IHttpClientFactory factory, TimeSpan period) : Cache<IGrouping<DateTime, Occurrence>[]>(factory, period)
+    public class CalendarCache(IHttpClientFactory factory, TimeSpan period) : PeriodicCache<IGrouping<DateTime, Occurrence>[]>(period)
     {
+        private readonly HttpClient client = factory.CreateClient();
+
         protected override async Task<IGrouping<DateTime, Occurrence>[]> Generate()
         {
             if ((await Hosting.Host.LocalSettings.ReadFromJson<Settings>()) is Settings settings)
             {
-                var contents = await Client.GetStringAsync(settings.Calendar);
+                var contents = await client.GetStringAsync(settings.Calendar);
                 var calendar = Ical.Net.Calendar.Load(contents);
                 return calendar
                                .GetOccurrences(DateTime.Today, DateTime.Today.AddDays(7))

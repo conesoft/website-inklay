@@ -2,7 +2,7 @@
 
 namespace Conesoft.Website.Inklay.Services;
 
-public class WeatherCache(IHttpClientFactory factory, TimeSpan period) : Cache<WeatherForecast>(factory, period)
+public class WeatherCache(TimeSpan period) : PeriodicCache<WeatherForecast>(period)
 {
     private readonly OpenMeteoClient client = new();
     private readonly WeatherForecastOptions options = new() { Current = CurrentOptions.All, Daily = DailyOptions.All };
