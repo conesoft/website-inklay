@@ -27,8 +27,8 @@
     .calendar .longest {
         font-weight: bold;
         /*         background-color: #ccc;
-            border-radius: 0.5rem;
-     */
+                            border-radius: 0.5rem;
+                     */
     }
 
     .calendar .timed li {
@@ -68,50 +68,88 @@
 </style>
 
 <ol class="calendar">
-    @foreach (var day in occurrences ?? [])
+    @foreach (var day in Enumerable.Range(0, 7).Select(i => DateTime.Today.AddDays(i)))
     {
+        var occurrence = occurrences?.FirstOrDefault(o => o.Key.Date == day.Date);
         <li class="day">
             <hgroup>
-                <h3>@day.Key.ToString("dddd", ci)</h3>
-                <h4>@day.Key.ToString("dd MMMM, yyyy", ci)</h4>
+                <h3>@day.ToString("dddd", ci)</h3>
+                <h4>@day.ToString("dd MMMM, yyyy", ci)</h4>
             </hgroup>
             @{
-                var events = day.Select(e => new
+                var events = occurrence?.Select(e => new
                 {
                     Period = e.Period,
                     Event = (e.Source as CalendarEvent)!
-                });
+                }) ?? [];
                 var longest = events.Where(e => e.Event.IsAllDay == false).MaxBy(e => e.Period.Duration);
 
                 var allday = events.Where(e => e.Event.IsAllDay);
             }
-            @if (allday.Any())
+            @if (events.Any() == false)
             {
-                <ol class="events allday">
-                    @foreach (var e in allday)
+                switch (day.DayOfWeek)
+                {
+                    case DayOfWeek.Monday:
+                    case DayOfWeek.Tuesday:
+                    case DayOfWeek.Wednesday:
+                    case DayOfWeek.Thursday:
+                        <ol class="events timed">
+                            <li class="longest">
+                                <span>09:00-18:00</span>
+                                <span>Schafisheim</span>
+                            </li>
+                        </ol>
+                        break;
+
+                    case DayOfWeek.Friday:
+                        <ol class="events allday">
+                            <li>
+                                <i>Frei</i>
+                            </li>
+                        </ol>
+                        break;
+
+                    case DayOfWeek.Saturday:
+                    case DayOfWeek.Sunday:
+                        <ol class="events allday">
+                            <li>
+                                <i>Weekend</i>
+                            </li>
+                        </ol>
+                        break;
+                }
+            }
+            else
+            {
+                @if (allday.Any())
+                {
+                    <ol class="events allday">
+                        @foreach (var e in allday)
+                        {
+                            <li>
+                                <i>@e.Event.Summary</i>
+                            </li>
+                        }
+                    </ol>
+                }
+                <ol class="events timed">
+                    @if (longest is not null)
+                    {
+                        <li class="longest">
+                            <span>@longest.Period.StartTime.Value.ToLocalTime().ToShortTimeString()-@longest.Period.EndTime.Value.ToLocalTime().ToShortTimeString()</span>
+                            <span>@longest.Event.Summary</span>
+                        </li>
+                    }
+                    @foreach (var e in events.Except(allday).Except([longest]))
                     {
                         <li>
-                            <i>@e.Event.Summary</i>
+                            <span>@e.Period.StartTime.Value.ToLocalTime().ToShortTimeString()-@e.Period.EndTime.Value.ToLocalTime().ToShortTimeString()</span>
+                            <span>@e.Event.Summary</span>
                         </li>
                     }
                 </ol>
             }
-            <ol class="events timed">
-                @if (longest is not null)
-                {
-                    <li class="longest">
-                        <span>@longest.Period.StartTime.Value.ToLocalTime().ToShortTimeString()-@longest.Period.EndTime.Value.ToLocalTime().ToShortTimeString()</span>
-                        <span>@longest.Event.Summary</span>
-                    </li>
-                }
-                @foreach (var e in events.Except(allday).Except([longest]))
-                {
-                    <li>
-                        <span>@e.Period.StartTime.Value.ToLocalTime().ToShortTimeString()-@e.Period.EndTime.Value.ToLocalTime().ToShortTimeString()</span>
-                        <span>@e.Event.Summary</span>
-                    </li>
-                }
-            </ol>
         </li>
     }
 </ol>
