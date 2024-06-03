@@ -18,6 +18,9 @@
     <PackageReference Include="Conesoft.Hosting" Version="1.2.5" />
     <PackageReference Include="Ical.Net" Version="4.2.0" />
     <PackageReference Include="OpenMeteo.dotnet" Version="2.0.0" />
+    <PackageReference Include="Serilog" Version="4.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

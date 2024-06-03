@@ -1,5 +1,6 @@
 ﻿using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
+using Serilog;
 
 namespace Conesoft.Website.Inklay.Services
 {
@@ -9,6 +10,7 @@ namespace Conesoft.Website.Inklay.Services
 
         protected override async Task<IGrouping<DateTime, Occurrence>[]> Generate()
         {
+            Log.Information("updating calendar cache");
             if ((await Hosting.Host.LocalSettings.ReadFromJson<Settings>()) is Settings settings)
             {
                 var contents = await client.GetStringAsync(settings.Calendar);

@@ -1,23 +1,15 @@
 ﻿namespace Conesoft.Website.Inklay.Services;
 
-public abstract class PeriodicTask
+public abstract class PeriodicTask(TimeSpan period) : BackgroundService
 {
-    private readonly PeriodicTimer timer;
-
-    public PeriodicTask(TimeSpan period)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        timer = new(period);
-        var _ = StartPeriodicCacheUpdate();
-    }
-
-    protected abstract Task Process();
-
-    public async Task StartPeriodicCacheUpdate()
-    {
+        var timer = new PeriodicTimer(period);
         do
         {
             await Process();
-        }
-        while (await timer.WaitForNextTickAsync());
+        } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
+
+    protected abstract Task Process();
 }
