@@ -6,6 +6,8 @@
 
 @inject WeatherCache weather
 
+@implements IDisposable
+
 <style>
     .weather {
     }
@@ -185,5 +187,20 @@
         Current = weatherData.Current!;
         DailyUnits = weatherData.DailyUnits!;
         Daily = weatherData.Daily!;
+
+        weatherData = null;
+    }
+
+    public void Dispose()
+    {
+
+        Log.Information("disposing Weather.razor");
+        CurrentTemperature = null!;
+        CurrentWind = null!;
+
+        CurrentUnits = null!;
+        Current = null!;
+        DailyUnits = null!;
+        Daily = null!;
     }
 }

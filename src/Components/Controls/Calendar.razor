@@ -6,6 +6,8 @@
 
 @inject Services.CalendarCache calendar
 
+@implements IDisposable
+
 <style>
     .calendar .day {
         padding-top: 0.5rem;
@@ -162,5 +164,11 @@
     protected override async Task OnInitializedAsync()
     {
         occurrences = await calendar.GetContent();
+    }
+
+    public void Dispose()
+    {
+        Log.Information("disposing Calendar.razor");
+        occurrences = null;
     }
 }

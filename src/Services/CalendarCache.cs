@@ -1,4 +1,5 @@
-﻿using Ical.Net.CalendarComponents;
+﻿using Conesoft.Hosting.Services;
+using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using Serilog;
 

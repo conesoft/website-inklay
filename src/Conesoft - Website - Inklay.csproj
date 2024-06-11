@@ -15,11 +15,11 @@
   <ItemGroup>
     <PackageReference Include="Conesoft.All" Version="*" />
     <PackageReference Include="Conesoft.Files" Version="1.9.3" />
-    <PackageReference Include="Conesoft.Hosting" Version="1.2.5" />
+    <PackageReference Include="Conesoft.Hosting" Version="1.4.1" />
     <PackageReference Include="Ical.Net" Version="4.2.0" />
     <PackageReference Include="OpenMeteo.dotnet" Version="2.0.0" />
     <PackageReference Include="Serilog" Version="4.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 

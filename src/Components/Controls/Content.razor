@@ -5,6 +5,9 @@
 @using System.Net
 @using Conesoft_Website_Kontrol.Tools
 @using Humanizer
+@using Serilog
+
+@implements IDisposable
 
 <style>
     .content h2 {
@@ -46,14 +49,15 @@
 
 @code {
     static Conesoft.Files.Directory Storage = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / "Entries";
-    //static Conesoft.Files.File NewestEntries = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / Filename.From("Newest Entries", "txt");
 
     public IEnumerable<Entry> Entries { get; set; } = [];
 
-    public record Entry(string Name, string Url, DateTime Published, string Description, string Category, string Filename)
+    public record Entry(string Name, string Url, DateTime Published, string Description, string Category, string Filename);
+
+    public void Dispose()
     {
-        private string[] types = ["jpg", "png", "svg", "gif"];
-        public string? ImageFilename { get; set; }
+        Log.Information("disposing Content.razor");
+        Entries = null!;
     }
 
     protected override async Task OnInitializedAsync()
