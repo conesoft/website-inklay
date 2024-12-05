@@ -1,4 +1,5 @@
 ﻿@using Conesoft.Files
+@using Conesoft.Hosting
 @using Conesoft.Tools
 @using System.Diagnostics
 @using System.Text.RegularExpressions
@@ -7,13 +8,14 @@
 @using Humanizer
 @using Serilog
 
+@inject HostEnvironment environment
+
 @implements IDisposable
 
 <style>
     .content h2 {
         line-height: 1rem;
         font-size: 1rem;
-        -max-height: 1rem;
         overflow: hidden;
     }
 
@@ -37,35 +39,35 @@
 
 <ul class="content">
     @foreach (var entry in Entries)
-    {
-        <li>
+{
+    <li>
             <a href="@entry.Url">
                 <h2>@WebUtility.HtmlDecode(entry.Name)</h2>
                 <p>@FastEntryDecoder.DecodeDescription(entry)</p>
             </a>
         </li>
-    }
+}
 </ul>
 
 @code {
-    static Conesoft.Files.Directory Storage = Conesoft.Hosting.Host.GlobalStorage / "FromSources" / "Feeds" / "Entries";
+Conesoft.Files.Directory Storage => environment.Global.Storage / "FromSources" / "Feeds" / "Entries";
 
-    public IEnumerable<Entry> Entries { get; set; } = [];
+public IEnumerable<Entry> Entries { get; set; } = [];
 
-    public record Entry(string Name, string Url, DateTime Published, string Description, string Category, string Filename);
+public record Entry(string Name, string Url, DateTime Published, string Description, string Category, string Filename);
 
-    public void Dispose()
-    {
-        Log.Information("disposing Content.razor");
-        Entries = null!;
-    }
+public void Dispose()
+{
+    Log.Information("disposing Content.razor");
+    Entries = null!;
+}
 
-    protected override async Task OnInitializedAsync()
-    {
-        var within6Hours = DateTime.Now.AddHours(-6);
+protected override async Task OnInitializedAsync()
+{
+    var within6Hours = DateTime.Now.AddHours(-6);
 
-        var loadedEntries = Storage.OfType("json", allDirectories: false).Where(f => f.Info.CreationTime > within6Hours).OrderByDescending(f => f.Info.CreationTime);
+    var loadedEntries = Storage.OfType("json", allDirectories: false).Where(f => f.Info.CreationTime > within6Hours).OrderByDescending(f => f.Info.CreationTime);
 
-        Entries = (await loadedEntries.Take(10).ReadFromJson<Entry>()).Select(f => f.Content);
-    }
+    Entries = (await loadedEntries.Take(10).ReadFromJson<Entry>()).Select(f => f.Content);
+}
 }

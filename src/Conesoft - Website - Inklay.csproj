@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Conesoft.Website.Inklay</RootNamespace>
@@ -14,13 +14,18 @@
 
   <ItemGroup>
     <PackageReference Include="Conesoft.All" Version="*" />
-    <PackageReference Include="Conesoft.Files" Version="1.9.3" />
-    <PackageReference Include="Conesoft.Hosting" Version="1.4.1" />
-    <PackageReference Include="Ical.Net" Version="4.2.0" />
+    <PackageReference Include="Conesoft.Files" Version="3.0.5" />
+    <PackageReference Include="Conesoft.Hosting" Version="3.1.0" />
+    <PackageReference Include="Ical.Net" Version="4.3.1" />
     <PackageReference Include="OpenMeteo.dotnet" Version="2.0.0" />
-    <PackageReference Include="Serilog" Version="4.0.0" />
+    <PackageReference Include="Serilog" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\fonts\" />
   </ItemGroup>
 
 </Project>

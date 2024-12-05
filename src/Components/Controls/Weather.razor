@@ -88,119 +88,117 @@
     </div>
     <ul class="daily">
         @foreach (var i in Enumerable.Range(0, Daily?.Time?.Length ?? 0))
-        {
-            <li>
+    {
+        <li>
                 @DateTime.Parse(Daily!.Time![i]).DayOfWeek.ToString()[..3].ToLowerInvariant()
                 <div class="icon">@((MarkupString)WeatherCodeIcons[(int)(Daily.Weathercode?[i] ?? 0)])</div>
                 <b>@Math.Round(Daily.Temperature_2m_max?[i] ?? 0, 0)</b><i>@DailyUnits.Temperature_2m_max</i>
             </li>
-        }
+    }
     </ul>
 </div>
 
 @code {
-    string Location = "Menziken";
+string CurrentTemperature { get; set; } = "";
+string CurrentWind { get; set; } = "";
 
-    string CurrentTemperature { get; set; } = "";
-    string CurrentWind { get; set; } = "";
+Current Current { get; set; } = new Current();
+CurrentUnits CurrentUnits { get; set; } = new CurrentUnits();
 
-    Current Current { get; set; } = new Current();
-    CurrentUnits CurrentUnits { get; set; } = new CurrentUnits();
+Daily Daily { get; set; } = new Daily();
+DailyUnits DailyUnits { get; set; } = new DailyUnits();
 
-    Daily Daily { get; set; } = new Daily();
-    DailyUnits DailyUnits { get; set; } = new DailyUnits();
-
-    Dictionary<int, string> WeatherCodes = new()
-        {
-            [0] = "Clear",
-            [1] = "Mostly Clear",
-            [2] = "Partly Cloudy",
-            [3] = "Overcast",
-            [45] = "Fog",
-            [48] = "Icy Fog",
-            [51] = "Light Drizzle",
-            [53] = "Drizzle",
-            [55] = "Heavy Drizzle",
-            [80] = "Light Showers",
-            [81] = "Showers",
-            [82] = "Heavy Showers",
-            [61] = "Light Rain",
-            [63] = "Rain",
-            [65] = "Heavy Rain",
-            [56] = "Light Freezing Drizzle",
-            [57] = "Freezing Drizzle",
-            [66] = "Light Freezing Rain",
-            [67] = "Freezing Rain",
-            [71] = "Light Snow",
-            [73] = "Snow",
-            [75] = "Heavy Snow",
-            [77] = "Snow Grains",
-            [85] = "Light Snow Showers",
-            [86] = "Snow Showers",
-            [95] = "Thunderstorm",
-            [96] = "Light T-storm w/ Hail",
-            [99] = "T-storm w/ Hail"
-        };
-
-    Dictionary<int, string> WeatherCodeIcons = new()
-        {
-            // contribution by @ccaleighc, check 'Weather Icons.xlsx'
-            [0] = "&#xe999",
-            [1] = "&#xe99b",
-            [2] = "&#xe972",
-            [3] = "&#xe96e",
-            [45] = "&#xe956",
-            [48] = "&#xe927",
-            [51] = "&#xe917",
-            [53] = "&#xe917",
-            [55] = "&#xe978",
-            [80] = "&#xe978",
-            [81] = "&#xe978",
-            [82] = "&#xe94d",
-            [61] = "&#xe94d",
-            [63] = "&#xe94d",
-            [65] = "&#xe94d",
-            [56] = "&#xe94b",
-            [57] = "&#xe94b",
-            [66] = "&#xe94f",
-            [67] = "&#xe94f",
-            [71] = "&#xe996",
-            [73] = "&#xe996",
-            [75] = "&#xe996",
-            [77] = "&#xe996",
-            [85] = "&#xe97a",
-            [86] = "&#xe97a",
-            [95] = "&#xe95a",
-            [96] = "&#xe937",
-            [99] = "&#xe937"
-        };
-
-
-    protected override async Task OnInitializedAsync()
+Dictionary<int, string> WeatherCodes = new()
     {
-        var client = new OpenMeteoClient();
-        var weatherData = await weather.GetContent();
-        CurrentTemperature = weatherData.Current.Temperature + weatherData.CurrentUnits.Temperature;
-        CurrentWind = $"{weatherData.Current.Windspeed_10m}{weatherData.CurrentUnits.Windspeed_10m}";// + {weatherData.Current.Winddirection_10m}{weatherData.CurrentUnits.Winddirection_10m}";
+        [0] = "Clear",
+        [1] = "Mostly Clear",
+        [2] = "Partly Cloudy",
+        [3] = "Overcast",
+        [45] = "Fog",
+        [48] = "Icy Fog",
+        [51] = "Light Drizzle",
+        [53] = "Drizzle",
+        [55] = "Heavy Drizzle",
+        [80] = "Light Showers",
+        [81] = "Showers",
+        [82] = "Heavy Showers",
+        [61] = "Light Rain",
+        [63] = "Rain",
+        [65] = "Heavy Rain",
+        [56] = "Light Freezing Drizzle",
+        [57] = "Freezing Drizzle",
+        [66] = "Light Freezing Rain",
+        [67] = "Freezing Rain",
+        [71] = "Light Snow",
+        [73] = "Snow",
+        [75] = "Heavy Snow",
+        [77] = "Snow Grains",
+        [85] = "Light Snow Showers",
+        [86] = "Snow Showers",
+        [95] = "Thunderstorm",
+        [96] = "Light T-storm w/ Hail",
+        [99] = "T-storm w/ Hail"
+    };
 
-        CurrentUnits = weatherData.CurrentUnits!;
-        Current = weatherData.Current!;
-        DailyUnits = weatherData.DailyUnits!;
-        Daily = weatherData.Daily!;
-
-        weatherData = null;
-    }
-
-    public void Dispose()
+Dictionary<int, string> WeatherCodeIcons = new()
     {
+        // contribution by @ccaleighc, check 'Weather Icons.xlsx'
+        [0] = "&#xe999",
+        [1] = "&#xe99b",
+        [2] = "&#xe972",
+        [3] = "&#xe96e",
+        [45] = "&#xe956",
+        [48] = "&#xe927",
+        [51] = "&#xe917",
+        [53] = "&#xe917",
+        [55] = "&#xe978",
+        [80] = "&#xe978",
+        [81] = "&#xe978",
+        [82] = "&#xe94d",
+        [61] = "&#xe94d",
+        [63] = "&#xe94d",
+        [65] = "&#xe94d",
+        [56] = "&#xe94b",
+        [57] = "&#xe94b",
+        [66] = "&#xe94f",
+        [67] = "&#xe94f",
+        [71] = "&#xe996",
+        [73] = "&#xe996",
+        [75] = "&#xe996",
+        [77] = "&#xe996",
+        [85] = "&#xe97a",
+        [86] = "&#xe97a",
+        [95] = "&#xe95a",
+        [96] = "&#xe937",
+        [99] = "&#xe937"
+    };
 
-        Log.Information("disposing Weather.razor");
-        CurrentTemperature = null!;
-        CurrentWind = null!;
 
-        CurrentUnits = null!;
-        Current = null!;
-        DailyUnits = null!;
-        Daily = null!;
-    }
+protected override async Task OnInitializedAsync()
+{
+    var client = new OpenMeteoClient();
+    var weatherData = await weather.GetContent();
+    CurrentTemperature = weatherData.Current!.Temperature + weatherData.CurrentUnits!.Temperature;
+    CurrentWind = $"{weatherData.Current.Windspeed_10m}{weatherData.CurrentUnits.Windspeed_10m}";// + {weatherData.Current.Winddirection_10m}{weatherData.CurrentUnits.Winddirection_10m}";
+
+    CurrentUnits = weatherData.CurrentUnits!;
+    Current = weatherData.Current!;
+    DailyUnits = weatherData.DailyUnits!;
+    Daily = weatherData.Daily!;
+
+    weatherData = null;
+}
+
+public void Dispose()
+{
+
+    Log.Information("disposing Weather.razor");
+    CurrentTemperature = null!;
+    CurrentWind = null!;
+
+    CurrentUnits = null!;
+    Current = null!;
+    DailyUnits = null!;
+    Daily = null!;
+}
 }

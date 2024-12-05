@@ -3,172 +3,254 @@
 @using Ical.Net.DataTypes
 @using NodaTime
 @using System.Globalization
+@using static Conesoft.Website.Inklay.Services.CalendarCache
 
 @inject Services.CalendarCache calendar
 
 @implements IDisposable
 
 <style>
-    .calendar .day {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid black;
+    .calendar {
+        display: grid;
+        gap: 0.75rem;
     }
 
-    .calendar .allday {
-        /* background-color: #ccc; */
-        padding-left: 0.5rem;
-        padding-bottom: 0.25rem;
-        text-align: center;
-    }
-
-        .calendar .allday + .timed {
-            padding-top: 0.25rem;
+        .calendar .day {
+            display: grid;
+            gap: 0.25rem;
         }
 
-    .calendar .longest {
-        font-weight: bold;
-        /*         background-color: #ccc;
-                            border-radius: 0.5rem;
-                     */
-    }
+        .calendar .allday {
+            text-align: center;
+        }
 
-    .calendar .timed li {
-        padding: 0.25rem;
-        display: flex;
-    }
+        .calendar .longest p {
+            font-weight: bold;
+        }
 
-    .calendar .timed span:last-of-type {
-        flex: 1;
-        margin-left: 1rem;
-    }
+        .calendar ol {
+            display: grid;
+            gap: 0.25rem;
+        }
 
-    .calendar hgroup {
-        padding-bottom: 0.5rem;
-        display: flex;
-    }
+        .calendar .timed li {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: start center;
+            gap: 0.5rem;
+        }
 
-        .calendar hgroup * {
+        .calendar .timed span.description {
             flex: 1;
-            line-height: 1rem;
-            font-size: 1rem;
         }
 
-        .calendar hgroup h4 {
-            text-align: right;
-            font-weight: normal;
+        .calendar hgroup {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            position: relative;
         }
 
-    .calendar li {
-        margin: 0;
-    }
+            .calendar hgroup:before {
+                position: absolute;
+                content: "";
+                width: 100%;
+                height: 50%;
+                border-bottom: 2px solid black;
+            }
 
-    .calendar i {
-        font-weight: 100;
-        opacity: 0.9;
-    }
+            .calendar hgroup * {
+                background: white;
+                margin-inline: -0.25rem;
+                padding-inline: 0.25rem;
+                z-index: 1;
+            }
+
+            .calendar hgroup h4 {
+                font-weight: normal;
+            }
+
+        .calendar i {
+            font-weight: 100;
+            opacity: 0.9;
+        }
+
+        .calendar time {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+            .calendar time sup {
+                font-size: 0.5rem;
+                font-weight: 400;
+            }
+
+        .calendar article {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .calendar p {
+            grid-column: 2;
+            grid-row: 1;
+            z-index: 1;
+            background: white;
+            justify-self: start;
+            padding-inline-end: 0.5rem;
+        }
+
+        .calendar address {
+            text-align: end;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-style: normal;
+            flex: 1;
+        }
 </style>
 
 <ol class="calendar">
-    @foreach (var day in Enumerable.Range(0, 7).Select(i => DateTime.Today.AddDays(i)))
-    {
-        var occurrence = occurrences?.FirstOrDefault(o => o.Key.Date == day.Date);
-        <li class="day">
+    @foreach (var day in Enumerable.Range(0, 10).Select(i => DateTime.Today.AddDays(i)))
+{
+    var entry = entries?.FirstOrDefault(o => o.Key.Date == day.Date);
+    <li class="day">
             <hgroup>
                 <h3>@day.ToString("dddd", ci)</h3>
-                <h4>@day.ToString("dd MMMM, yyyy", ci)</h4>
+                <h4>@day.ToString("MMMM", ci) @day.Day.Ordinalize(ci)</h4>
             </hgroup>
             @{
-                var events = occurrence?.Select(e => new
-                {
-                    Period = e.Period,
-                    Event = (e.Source as CalendarEvent)!
-                }) ?? [];
-                var longest = events.Where(e => e.Event.IsAllDay == false).MaxBy(e => e.Period.Duration);
-
-                var allday = events.Where(e => e.Event.IsAllDay);
-            }
-            @if (events.Any() == false)
+            var events = entry?.Select(e => new
             {
-                switch (day.DayOfWeek)
-                {
-                    case DayOfWeek.Monday:
-                    case DayOfWeek.Tuesday:
-                    case DayOfWeek.Wednesday:
-                    case DayOfWeek.Thursday:
-                        <ol class="events timed">
+                e.Name,
+                e.Occurrence,
+                e.Occurrence.Period,
+                Event = (e.Occurrence.Source as CalendarEvent)!
+            }) ?? [];
+
+            var longest = events
+            .Where(e => e.Event.IsAllDay == false)
+            .GroupBy(e => e.Name)
+            .ToDictionary(g => g.Key, g => g.MaxBy(e => e.Period.Duration)!)
+            ;
+
+
+
+            // .Select(g => new
+            // {
+            //     g.Key,
+            //     Longest = g.MaxBy(e => e.Period.Duration)
+            // })
+            // .Where(g => g.Longest != null)
+            // .GroupBy(g => g.Key, g => g.Longest!);
+
+            var allday = events.Where(e => e.Event.IsAllDay);
+        }
+            @if (events.Any() == false)
+        {
+            switch (day.DayOfWeek)
+            {
+                case DayOfWeek.Monday:
+                case DayOfWeek.Tuesday:
+                case DayOfWeek.Wednesday:
+                case DayOfWeek.Thursday:
+                    <ol class="events timed">
                             <li class="longest">
-                                <span>09:00-18:00</span>
-                                <span>Büro Schafisheim</span>
+                                <time>09<sup>00</sup>-18<sup>00</sup></time>
+                                <article>
+                                    <p>Büro</p>
+                                    <address>Schafisheim</address>
+                                </article>
                             </li>
                         </ol>
-                        break;
+                    break;
 
-                    case DayOfWeek.Friday:
-                        <ol class="events allday">
+                case DayOfWeek.Friday:
+                    <ol class="events allday">
                             <li>
                                 <i>Frei</i>
                             </li>
                         </ol>
-                        break;
+                    break;
 
-                    case DayOfWeek.Saturday:
-                    case DayOfWeek.Sunday:
-                        <ol class="events allday">
+                case DayOfWeek.Saturday:
+                case DayOfWeek.Sunday:
+                    <ol class="events allday">
                             <li>
                                 <i>Weekend</i>
                             </li>
                         </ol>
-                        break;
-                }
+                    break;
             }
-            else
-            {
-                @if (allday.Any())
+        }
+        else
+        {
+            <ol class="events allday">
+                    @foreach (var e in allday)
                 {
-                    <ol class="events allday">
-                        @foreach (var e in allday)
-                        {
-                            <li>
-                                <i>@e.Event.Summary</i>
-                            </li>
-                        }
-                    </ol>
+                    <li>
+                            <i>@e.Event.Summary</i>
+                        </li>
                 }
-                <ol class="events timed">
-                    @if (longest is not null)
-                    {
-                        <li class="longest">
-                            <span>@longest.Period.StartTime.Value.ToLocalTime().ToShortTimeString()-@longest.Period.EndTime.Value.ToLocalTime().ToShortTimeString()</span>
-                            <span>@longest.Event.Summary</span>
-                        </li>
-                    }
-                    @foreach (var e in events.Except(allday).Except([longest]))
-                    {
-                        <li>
-                            <span>@e.Period.StartTime.Value.ToLocalTime().ToShortTimeString()-@e.Period.EndTime.Value.ToLocalTime().ToShortTimeString()</span>
-                            <span>@e.Event.Summary</span>
-                        </li>
-                    }
                 </ol>
-            }
+            <ol class="events timed">
+                    @foreach (var (name, e) in longest)
+                {
+                    var start = e.Period.StartTime.Value.ToLocalTime().ToShortTimeString();
+                    var end = e.Period.EndTime.Value.ToLocalTime().ToShortTimeString();
+                    <li class="longest">
+                            <time>@start[0..2]<sup>@start[3..5]</sup>-@end[0..2]<sup>@end[3..5]</sup></time>
+                            <article>
+                                <p>@e.Event.Summary</p>
+                                <address>@ShortLocation(e.Event.Location)</address>
+                            </article>
+                        </li>
+                }
+                    @foreach (var e in events.Except(allday).Except(longest.Values))
+                {
+                    var start = e.Period.StartTime.Value.ToLocalTime().ToShortTimeString();
+                    var end = e.Period.EndTime.Value.ToLocalTime().ToShortTimeString();
+                    <li>
+                            <time>@start[0..2]<sup>@start[3..5]</sup>-@end[0..2]<sup>@end[3..5]</sup></time>
+                            <article>
+                                <p>@e.Event.Summary</p>
+                                <address>@ShortLocation(e.Event.Location)</address>
+                            </article>
+                        </li>
+                }
+                </ol>
+        }
         </li>
-    }
+}
 </ol>
 
 @code {
-    CultureInfo ci = new("en-ca");
+CultureInfo ci = new("en-ca");
 
-    IGrouping<DateTime, Occurrence>[]? occurrences;
+IGrouping<DateTime, Entry>[]? entries;
 
-    protected override async Task OnInitializedAsync()
+protected override async Task OnInitializedAsync()
+{
+    entries = await calendar.GetContent();
+}
+
+public void Dispose()
+{
+    entries = null;
+}
+
+public string ShortLocation(string location)
+{
+    location ??= "";
+    var l = location.Replace("(", "").Replace(")", "").Replace(",", "").Replace(";", "").Replace("_", " ").Replace("-", " ").Split(" ").Select(s => s.Trim()).Where(s => s.Length > 0);
+    return string.Join(" ", l.Where(l =>
     {
-        occurrences = await calendar.GetContent();
-    }
-
-    public void Dispose()
-    {
-        Log.Information("disposing Calendar.razor");
-        occurrences = null;
-    }
+        if (l.All(c => Char.IsDigit(c) || Char.IsPunctuation(c)) == true) return false;
+        if (l.ToLowerInvariant().Contains("strasse")) return false;
+        if (l.ToLowerInvariant() == "switzerland") return false;
+        if (l.ToLowerInvariant() == "vz") return false;
+        if (l.Length == 1) return false;
+        return true;
+    }));
+}
 }

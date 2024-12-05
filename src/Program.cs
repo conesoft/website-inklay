@@ -3,13 +3,17 @@ using Conesoft.Website.Inklay.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddHostConfigurationFiles<CalendarCache.Settings>(legacyMode: true);
+builder.AddHostEnvironmentInfo();
+builder.AddLoggingService();
+
 // Add services to the container.
-builder.Services.AddLoggingToHost();
-builder.Services.AddHttpClient();
-builder.Services.AddPeriodicGarbageCollection(TimeSpan.FromMinutes(1));
-builder.Services.AddHostedServiceWith<CalendarCache>(TimeSpan.FromMinutes(5));
-builder.Services.AddHostedServiceWith<WeatherCache>(TimeSpan.FromMinutes(30));
-builder.Services.AddRazorComponents();
+builder.Services
+    .AddCompiledHashCacheBuster()
+    .AddHttpClient()
+    .AddHostedServiceWith<CalendarCache>(TimeSpan.FromMinutes(5))
+    .AddHostedServiceWith<WeatherCache>(TimeSpan.FromMinutes(30))
+    .AddRazorComponents();
 
 var app = builder.Build();
 
@@ -21,12 +25,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseLoggingServiceOnRequests();
+
 app
+    .UseCompiledHashCacheBuster()
     .UseDeveloperExceptionPage()
     .UseHttpsRedirection()
-    .UseStaticFiles()
     .UseAntiforgery();
 
+app.MapStaticAssets();
 app.MapRazorComponents<Conesoft.Website.Inklay.Components.App>();
 
 app.Run();
