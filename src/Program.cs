@@ -3,7 +3,10 @@ using Conesoft.Website.Inklay.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddHostConfigurationFiles<CalendarCache.Settings>(legacyMode: true);
+builder.AddHostConfigurationFiles(configurator =>
+{
+    configurator.Add<CalendarCache.Settings>();
+});
 builder.AddHostEnvironmentInfo();
 builder.AddLoggingService();
 
