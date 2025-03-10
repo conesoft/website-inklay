@@ -1,0 +1,16 @@
+﻿@using Conesoft.Files
+@using Conesoft.Hosting
+
+@inject HostEnvironment environment
+
+<img src="/@(img).jpg" />
+
+@code {
+    string img = "cooper";
+
+    protected override void OnInitialized()
+    {
+        var content = (environment.Global.Storage / "home" / "kitchen" / Filename.From("dishwasher", "txt")).Now.ReadText();
+        img = content ?? img;
+    }
+}
