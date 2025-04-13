@@ -13,18 +13,18 @@ builder
     .AddHostEnvironmentInfo()
     .AddLoggingService()
     .AddUsersWithStorage()
+    .AddCompiledHashCacheBuster()
+    .AddHostingDefaults()
     ;
 
 builder.Services
-    .AddCompiledHashCacheBuster()
-    .AddHttpClient()
     .AddHostedServiceWith<CalendarCache>(TimeSpan.FromMinutes(5))
     .AddHostedServiceWith<WeatherCache>(TimeSpan.FromMinutes(30))
-    .AddRazorComponents()
     ;
 
 var app = builder.Build();
 
+app.UseCompiledHashCacheBuster();
 app.MapPwaInformationFromAppSettings();
 app.MapUsersWithStorage();
 app.MapStaticAssets();

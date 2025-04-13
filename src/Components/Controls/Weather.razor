@@ -12,66 +12,66 @@
     .weather {
     }
 
-        .weather > * {
-            margin-bottom: 1rem;
-        }
+    .weather > * {
+    margin-bottom: 1rem;
+    }
 
-        .weather .current {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+    .weather .current {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    }
 
-            .weather .current .temperature {
-                font-weight: 900;
-                font-size: 2rem;
-                line-height: 2rem;
-            }
+    .weather .current .temperature {
+    font-weight: 900;
+    font-size: 2rem;
+    line-height: 2rem;
+    }
 
-            .weather .current .weathercode {
-                font-size: 1.7rem;
-                font-weight: 100;
-                white-space: nowrap;
-            }
+    .weather .current .weathercode {
+    font-size: 1.7rem;
+    font-weight: 100;
+    white-space: nowrap;
+    }
 
-            .weather .current .icon {
-                font-size: 5rem;
-                width: 5rem;
-                line-height: 5rem;
-            }
+    .weather .current .icon {
+    font-size: 5rem;
+    width: 5rem;
+    line-height: 5rem;
+    }
 
-        .weather .daily {
-            display: flex;
-            gap: 0.5rem;
-            padding-left: 0.25rem;
-            padding-right: 0.25rem;
-        }
+    .weather .daily {
+    display: flex;
+    gap: 0.5rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    }
 
-            .weather .daily li {
-                text-align: center;
-                flex: 1;
-                list-style-type: none;
-                margin: -0.5rem -0.25rem;
-                padding: 0.5rem 0.25rem;
-            }
+    .weather .daily li {
+    text-align: center;
+    flex: 1;
+    list-style-type: none;
+    margin: -0.5rem -0.25rem;
+    padding: 0.5rem 0.25rem;
+    }
 
-            .weather .daily i {
-                font-weight: 100;
-                font-size: 0.8rem;
-            }
+    .weather .daily i {
+    font-weight: 100;
+    font-size: 0.8rem;
+    }
 
-            .weather .daily .icon {
-                font-size: 2rem;
-                line-height: 2rem;
-            }
+    .weather .daily .icon {
+    font-size: 2rem;
+    line-height: 2rem;
+    }
 
-        .weather .icon {
-            padding-top: 0.25rem;
-            padding-bottom: 0.25rem;
-            font-family: 'pe-icon-set-weather';
-        }
+    .weather .icon {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    font-family: 'pe-icon-set-weather';
+    }
 </style>
 
 <div class="weather">
@@ -88,117 +88,125 @@
     </div>
     <ul class="daily">
         @foreach (var i in Enumerable.Range(0, Daily?.Time?.Length ?? 0))
-    {
-        <li>
+        {
+            <li>
                 @DateTime.Parse(Daily!.Time![i]).DayOfWeek.ToString()[..3].ToLowerInvariant()
+                <div>@DailyAirSamples[i].GetAirQualityGraph()</div>
                 <div class="icon">@((MarkupString)WeatherCodeIcons[(int)(Daily.Weathercode?[i] ?? 0)])</div>
                 <b>@Math.Round(Daily.Temperature_2m_max?[i] ?? 0, 0)</b><i>@DailyUnits.Temperature_2m_max</i>
             </li>
-    }
+        }
     </ul>
 </div>
 
 @code {
-string CurrentTemperature { get; set; } = "";
-string CurrentWind { get; set; } = "";
+    string CurrentTemperature { get; set; } = "";
+    string CurrentWind { get; set; } = "";
 
-Current Current { get; set; } = new Current();
-CurrentUnits CurrentUnits { get; set; } = new CurrentUnits();
+    Current Current { get; set; } = new Current();
+    CurrentUnits CurrentUnits { get; set; } = new CurrentUnits();
 
-Daily Daily { get; set; } = new Daily();
-DailyUnits DailyUnits { get; set; } = new DailyUnits();
+    Daily Daily { get; set; } = new Daily();
+    DailyUnits DailyUnits { get; set; } = new DailyUnits();
 
-Dictionary<int, string> WeatherCodes = new()
-    {
-        [0] = "Clear",
-        [1] = "Mostly Clear",
-        [2] = "Partly Cloudy",
-        [3] = "Overcast",
-        [45] = "Fog",
-        [48] = "Icy Fog",
-        [51] = "Light Drizzle",
-        [53] = "Drizzle",
-        [55] = "Heavy Drizzle",
-        [80] = "Light Showers",
-        [81] = "Showers",
-        [82] = "Heavy Showers",
-        [61] = "Light Rain",
-        [63] = "Rain",
-        [65] = "Heavy Rain",
-        [56] = "Light Freezing Drizzle",
-        [57] = "Freezing Drizzle",
-        [66] = "Light Freezing Rain",
-        [67] = "Freezing Rain",
-        [71] = "Light Snow",
-        [73] = "Snow",
-        [75] = "Heavy Snow",
-        [77] = "Snow Grains",
-        [85] = "Light Snow Showers",
-        [86] = "Snow Showers",
-        [95] = "Thunderstorm",
-        [96] = "Light T-storm w/ Hail",
-        [99] = "T-storm w/ Hail"
-    };
+    DailyAirSamples[] DailyAirSamples { get; set; } = new Services.DailyAirSamples[7];
+    string DailyAirSampleUnit { get; set; } = "";
 
-Dictionary<int, string> WeatherCodeIcons = new()
-    {
+    Dictionary<int, string> WeatherCodes = new()
+        {
+            [0] = "Clear",
+            [1] = "Mostly Clear",
+            [2] = "Partly Cloudy",
+            [3] = "Overcast",
+            [45] = "Fog",
+            [48] = "Icy Fog",
+            [51] = "Light Drizzle",
+            [53] = "Drizzle",
+            [55] = "Heavy Drizzle",
+            [80] = "Light Showers",
+            [81] = "Showers",
+            [82] = "Heavy Showers",
+            [61] = "Light Rain",
+            [63] = "Rain",
+            [65] = "Heavy Rain",
+            [56] = "Light Freezing Drizzle",
+            [57] = "Freezing Drizzle",
+            [66] = "Light Freezing Rain",
+            [67] = "Freezing Rain",
+            [71] = "Light Snow",
+            [73] = "Snow",
+            [75] = "Heavy Snow",
+            [77] = "Snow Grains",
+            [85] = "Light Snow Showers",
+            [86] = "Snow Showers",
+            [95] = "Thunderstorm",
+            [96] = "Light T-storm w/ Hail",
+            [99] = "T-storm w/ Hail"
+        };
+
+    Dictionary<int, string> WeatherCodeIcons = new()
+        {
         // contribution by @ccaleighc, check 'Weather Icons.xlsx'
-        [0] = "&#xe999",
-        [1] = "&#xe99b",
-        [2] = "&#xe972",
-        [3] = "&#xe96e",
-        [45] = "&#xe956",
-        [48] = "&#xe927",
-        [51] = "&#xe917",
-        [53] = "&#xe917",
-        [55] = "&#xe978",
-        [80] = "&#xe978",
-        [81] = "&#xe978",
-        [82] = "&#xe94d",
-        [61] = "&#xe94d",
-        [63] = "&#xe94d",
-        [65] = "&#xe94d",
-        [56] = "&#xe94b",
-        [57] = "&#xe94b",
-        [66] = "&#xe94f",
-        [67] = "&#xe94f",
-        [71] = "&#xe996",
-        [73] = "&#xe996",
-        [75] = "&#xe996",
-        [77] = "&#xe996",
-        [85] = "&#xe97a",
-        [86] = "&#xe97a",
-        [95] = "&#xe95a",
-        [96] = "&#xe937",
-        [99] = "&#xe937"
-    };
+            [0] = "&#xe999",
+            [1] = "&#xe99b",
+            [2] = "&#xe972",
+            [3] = "&#xe96e",
+            [45] = "&#xe956",
+            [48] = "&#xe927",
+            [51] = "&#xe917",
+            [53] = "&#xe917",
+            [55] = "&#xe978",
+            [80] = "&#xe978",
+            [81] = "&#xe978",
+            [82] = "&#xe94d",
+            [61] = "&#xe94d",
+            [63] = "&#xe94d",
+            [65] = "&#xe94d",
+            [56] = "&#xe94b",
+            [57] = "&#xe94b",
+            [66] = "&#xe94f",
+            [67] = "&#xe94f",
+            [71] = "&#xe996",
+            [73] = "&#xe996",
+            [75] = "&#xe996",
+            [77] = "&#xe996",
+            [85] = "&#xe97a",
+            [86] = "&#xe97a",
+            [95] = "&#xe95a",
+            [96] = "&#xe937",
+            [99] = "&#xe937"
+        };
 
 
-protected override async Task OnInitializedAsync()
-{
-    var client = new OpenMeteoClient();
-    var weatherData = await weather.GetContent();
-    CurrentTemperature = weatherData.Current!.Temperature + weatherData.CurrentUnits!.Temperature;
-    CurrentWind = $"{weatherData.Current.Windspeed_10m}{weatherData.CurrentUnits.Windspeed_10m}";// + {weatherData.Current.Winddirection_10m}{weatherData.CurrentUnits.Winddirection_10m}";
+    protected override async Task OnInitializedAsync()
+    {
+        var client = new OpenMeteoClient();
+        var cachedWeatherData = await weather.GetContent();
+        var weatherData = cachedWeatherData.WeatherForecast;
+        CurrentTemperature = weatherData.Current!.Temperature + weatherData.CurrentUnits!.Temperature;
+        CurrentWind = $"{weatherData.Current.Windspeed_10m}{weatherData.CurrentUnits.Windspeed_10m}";// + {weatherData.Current.Winddirection_10m}{weatherData.CurrentUnits.Winddirection_10m}";
 
-    CurrentUnits = weatherData.CurrentUnits!;
-    Current = weatherData.Current!;
-    DailyUnits = weatherData.DailyUnits!;
-    Daily = weatherData.Daily!;
+        CurrentUnits = weatherData.CurrentUnits!;
+        Current = weatherData.Current!;
+        DailyUnits = weatherData.DailyUnits!;
+        Daily = weatherData.Daily!;
 
-    weatherData = null;
-}
+        DailyAirSamples = cachedWeatherData.DailyAirSamples;
+        DailyAirSampleUnit = cachedWeatherData.DailyAirSampleUnit;
 
-public void Dispose()
-{
+        weatherData = null;
+    }
 
-    Log.Information("disposing Weather.razor");
-    CurrentTemperature = null!;
-    CurrentWind = null!;
+    public void Dispose()
+    {
 
-    CurrentUnits = null!;
-    Current = null!;
-    DailyUnits = null!;
-    Daily = null!;
-}
+        Log.Information("disposing Weather.razor");
+        CurrentTemperature = null!;
+        CurrentWind = null!;
+
+        CurrentUnits = null!;
+        Current = null!;
+        DailyUnits = null!;
+        Daily = null!;
+    }
 }
