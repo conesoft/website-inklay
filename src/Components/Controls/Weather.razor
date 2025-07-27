@@ -3,6 +3,7 @@
 @using OpenMeteo
 @using System.Text.RegularExpressions
 @using System.Diagnostics
+@using Conesoft.Website.Inklay.Tools
 
 @inject WeatherCache weather
 
@@ -12,66 +13,111 @@
     .weather {
     }
 
-    .weather > * {
-    margin-bottom: 1rem;
-    }
+        .weather > * {
+            margin-bottom: 1rem;
+        }
 
-    .weather .current {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    }
+        .weather .current {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
 
-    .weather .current .temperature {
-    font-weight: 900;
-    font-size: 2rem;
-    line-height: 2rem;
-    }
+            .weather .current .temperature {
+                font-weight: 900;
+                font-size: 2rem;
+                line-height: 2rem;
+            }
 
-    .weather .current .weathercode {
-    font-size: 1.7rem;
-    font-weight: 100;
-    white-space: nowrap;
-    }
+            .weather .current .weathercode {
+                font-size: 1.7rem;
+                font-weight: 100;
+                white-space: nowrap;
+            }
 
-    .weather .current .icon {
-    font-size: 5rem;
-    width: 5rem;
-    line-height: 5rem;
-    }
+            .weather .current .icon {
+                font-size: 5rem;
+                width: 5rem;
+                line-height: 5rem;
+            }
 
-    .weather .daily {
-    display: flex;
-    gap: 0.5rem;
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-    }
+        .weather .daily {
+            display: flex;
+            gap: 0.5rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        }
 
-    .weather .daily li {
-    text-align: center;
-    flex: 1;
-    list-style-type: none;
-    margin: -0.5rem -0.25rem;
-    padding: 0.5rem 0.25rem;
-    }
+            .weather .daily > li {
+                text-align: center;
+                flex: 1;
+                list-style-type: none;
+                margin: -0.5rem -0.25rem;
+                padding: 0.5rem 0.25rem;
+            }
 
-    .weather .daily i {
-    font-weight: 100;
-    font-size: 0.8rem;
-    }
+            .weather .daily i {
+                font-weight: 100;
+                font-size: 0.8rem;
+            }
 
-    .weather .daily .icon {
-    font-size: 2rem;
-    line-height: 2rem;
-    }
+            .weather .daily ul.airquality {
+                display: flex;
+                margin-block: 0.25rem;
+                height: 0.75rem;
+                border: .125rem solid black;
+                padding-inline: calc(2 * (100% - 2 * .125rem) / 24);
+                border-radius: 0.75rem;
+                background: black;
+            }
 
-    .weather .icon {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    font-family: 'pe-icon-set-weather';
-    }
+                .weather .daily ul.airquality li {
+                    width: calc((var(--count) - 1) * 100% / 24);
+                    background-color: white;
+                    position: relative;
+                    margin-inline: calc(100% / 24 / 2);
+                }
+
+                    .weather .daily ul.airquality li:after {
+                        content: "";
+                        border-radius: 0.75rem;
+                        position: absolute;
+                        inset: 0 calc(-0.375rem + 0.125rem);
+                        background: white;
+                    }
+
+                    .weather .daily ul.airquality li.low:after {
+                        background-color: #AAA;
+                        z-index: 1;
+                    }
+
+                    .weather .daily ul.airquality li.medium:after {
+                        background-color: #777;
+                        z-index: 2;
+                    }
+
+                    .weather .daily ul.airquality li.high:after {
+                        background-color: #444;
+                        z-index: 3;
+                    }
+
+                    .weather .daily ul.airquality li.veryhigh:after {
+                        background-color: black;
+                        z-index: 4;
+                    }
+
+            .weather .daily .icon {
+                font-size: 2rem;
+                line-height: 2rem;
+            }
+
+        .weather .icon {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            font-family: 'pe-icon-set-weather';
+        }
 </style>
 
 <div class="weather">
@@ -91,7 +137,12 @@
         {
             <li>
                 @DateTime.Parse(Daily!.Time![i]).DayOfWeek.ToString()[..3].ToLowerInvariant()
-                <div>@DailyAirSamples[i].GetAirQualityGraph()</div>
+                <ul class="airquality">
+                    @foreach (var samples in DailyAirSamples[i].GetPeaks().GroupWhile((previous, next) => previous == next))
+                    {
+                        <li class="@samples.First().ToString().ToLower()" style="--count: @samples.Count()"></li>
+                    }
+                </ul>
                 <div class="icon">@((MarkupString)WeatherCodeIcons[(int)(Daily.Weathercode?[i] ?? 0)])</div>
                 <b>@Math.Round(Daily.Temperature_2m_max?[i] ?? 0, 0)</b><i>@DailyUnits.Temperature_2m_max</i>
             </li>
@@ -193,6 +244,9 @@
 
         DailyAirSamples = cachedWeatherData.DailyAirSamples;
         DailyAirSampleUnit = cachedWeatherData.DailyAirSampleUnit;
+
+        var peaks = DailyAirSamples.First().GetPeaks();
+        var ranges = DailyAirSamples.First().GetPeakRanges();
 
         weatherData = null;
     }

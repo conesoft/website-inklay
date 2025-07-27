@@ -43,50 +43,67 @@ public class WeatherCache(TimeSpan period) : PeriodicCache<CachedWeatherData>(pe
 
 public record DailyAirSamples(DateTime Day, Dictionary<DailyAirSamples.PollenType, float[]> Samples)
 {
-    // https://www.meteoswiss.admin.ch/dam/jcr:43b4f361-8bc1-4af7-a232-c126de0f2f80/Belastungsklassen-der-allergenen-Pollenarten_E.pdf
-
-    record Thresholds(float Medium, float High);
-    enum Threshold { Low, Medium, High }
+    record Thresholds(float Medium, float High, float VeryHigh);
+    public enum Threshold { NoValue, Low, Medium, High, VeryHigh, MaxValue }
     public enum PollenType { Alder, Birch, Grass, Mugwort, Ragweed }
 
+    // https://www.meteoswiss.admin.ch/dam/jcr:43b4f361-8bc1-4af7-a232-c126de0f2f80/Belastungsklassen-der-allergenen-Pollenarten_E.pdf
     readonly Dictionary<PollenType, Thresholds> thresholds = new()
     {
-        [PollenType.Alder] = new(70, 250),
-        [PollenType.Birch] = new(70, 350),
-        [PollenType.Grass] = new(50, 150),
-        [PollenType.Mugwort] = new(15, 50),
-        [PollenType.Ragweed] = new(10, 30)
+        [PollenType.Alder] = new(10, 70, 250),
+        [PollenType.Birch] = new(10, 70, 350),
+        [PollenType.Grass] = new(20, 50, 150),
+        [PollenType.Mugwort] = new(5, 15, 50),
+        [PollenType.Ragweed] = new(5, 10, 30)
     };
 
-    public string GetAirQualityGraph()
-    {
-        var stats = Enumerable
-            .Range(0, 4)
-            .Select(i => Samples.Aggregate(default(Threshold?), (accumulation, s) =>
-            {
-                var pollenType = s.Key;
-                var samples = s.Value.Skip(i * 6).Take(6);
-
-                var high = thresholds[pollenType].High;
-                var medium = thresholds[pollenType].Medium;
-
-                return samples.Aggregate(accumulation, (acc, value) =>
-                {
-                    if (value >= high || acc == Threshold.High) return Threshold.High;
-                    if (value >= medium || acc == Threshold.Medium) return Threshold.Medium;
-                    return Threshold.Low;
-                });
-            }))
-            .ToArray();
-
-        // ◌○●
-        return stats.Length > 0 ? string.Join("", stats.Select(stat => stat switch
+    public Threshold[] GetPeaks() => [.. Enumerable
+        .Range(0, 24)
+        .Select(i => Samples.Aggregate(Threshold.NoValue, (acc, s) =>
         {
-            Threshold.High => '●',
-            Threshold.Medium => '○',
-            Threshold.Low =>  '◌',
-            _ => ' '
-        })) : " ";
+            var pollenType = s.Key;
+            var sample = i < s.Value.Length ? s.Value[i] : default(float?);
+
+            var veryhigh = thresholds[pollenType].VeryHigh;
+            var high = thresholds[pollenType].High;
+            var medium = thresholds[pollenType].Medium;
+
+            if(sample == null) return acc;
+
+            if (sample >= veryhigh || acc == Threshold.VeryHigh) return Threshold.VeryHigh;
+            if (sample >= high || acc == Threshold.High) return Threshold.High;
+            if (sample >= medium || acc == Threshold.Medium) return Threshold.Medium;
+            return Threshold.Low;
+        }))
+    ];
+
+
+    public Dictionary<Threshold, List<Range>> GetPeakRanges()
+    {
+        var peaks = GetPeaks();
+        var ranges = new Dictionary<Threshold, List<Range>>();
+        for (var threshold = Threshold.NoValue; threshold < Threshold.MaxValue; threshold++)
+        {
+            if(ranges.ContainsKey(threshold) == false)
+            {
+                ranges[threshold] = [];
+            }
+            var start = 0;
+            var end = 0;
+            for (var i = 1; i < peaks.Length; i++)
+            {
+                if (peaks[i - 1] < threshold && peaks[i] >= threshold)
+                {
+                    start = i;
+                }
+                if (peaks[i - 1] >= threshold && peaks[i] < threshold)
+                {
+                    end = i;
+                    ranges[threshold].Add(new Range(start, end));
+                }
+            }
+        }
+        return ranges;
     }
 };
 

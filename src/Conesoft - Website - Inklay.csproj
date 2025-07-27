@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Conesoft.Hosting" Version="3.6.3" />
+    <PackageReference Include="Conesoft.Hosting" Version="3.7.4" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
     <PackageReference Include="OpenMeteo.dotnet" Version="2.0.0" />
-    <PackageReference Include="System.Text.Json" Version="9.0.3" />
+    <PackageReference Include="System.Text.Json" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@ namespace Conesoft.Website.Inklay.Services;
 
 public class CalendarCache(IHttpClientFactory factory, IOptions<CalendarCache.Settings> settings, TimeSpan period) : PeriodicCache<IGrouping<DateTime, CalendarCache.Entry>[]>(period)
 {
-    private readonly HttpClient client = factory.CreateClient();
+    private HttpClient Client => factory.CreateClient();
 
     protected override async Task<IGrouping<DateTime, Entry>[]> Generate()
     {
@@ -16,10 +16,9 @@ public class CalendarCache(IHttpClientFactory factory, IOptions<CalendarCache.Se
         try
         {
             var all = await Task.WhenAll(settings.Value.Calendars.Select(c => GetCalendar(c.Key, c.Value)));
-            return all
+            return [.. all
                 .SelectMany(e => e)
-                .GroupBy(e => e.Occurrence.Period.StartTime.Date)
-                .ToArray();
+                .GroupBy(e => e.Occurrence.Period.StartTime.Date)];
         }
         catch (Exception ex)
         {
@@ -32,14 +31,13 @@ public class CalendarCache(IHttpClientFactory factory, IOptions<CalendarCache.Se
     {
         try
         {
-            var contents = await client.GetStringAsync(source);
+            var contents = await Client.GetStringAsync(source);
             var calendar = Ical.Net.Calendar.Load(contents);
 
-            return calendar
+            return [.. calendar
                            .GetOccurrences(DateTime.Today, DateTime.Today.AddDays(10))
                            .Where(o => o.Source is CalendarEvent && o.Period != null)
-                           .Select(o => new Entry(name, o))
-                           .ToArray();
+                           .Select(o => new Entry(name, o))];
         }
         catch (Exception ex)
         {
